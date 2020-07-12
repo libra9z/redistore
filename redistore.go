@@ -6,6 +6,7 @@ package redistore
 
 import (
 	"bytes"
+	"context"
 	"encoding/base32"
 	"encoding/gob"
 	"encoding/json"
@@ -280,7 +281,8 @@ func (s *RediStore) Save(r *http.Request, w http.ResponseWriter, session *sessio
 // WARNING: This method should be considered deprecated since it is not exposed via the gorilla/sessions interface.
 // Set session.Options.MaxAge = -1 and call Save instead. - July 18th, 2013
 func (s *RediStore) Delete(r *http.Request, w http.ResponseWriter, session *sessions.Session) error {
-	cmd := s.Pool.Del(s.keyPrefix+session.ID)
+	ctx := context.Background()
+	cmd := s.Pool.Del(ctx,s.keyPrefix+session.ID)
 	if cmd.Err() != nil {
 		return cmd.Err()
 	}
@@ -297,8 +299,8 @@ func (s *RediStore) Delete(r *http.Request, w http.ResponseWriter, session *sess
 
 // ping does an internal ping against a server to check if it is alive.
 func (s *RediStore) ping() (bool, error) {
-
-	cmd := s.Pool.Ping()
+	ctx := context.Background()
+	cmd := s.Pool.Ping(ctx)
 	if cmd.Err() != nil  {
 		return false, cmd.Err()
 	}
@@ -319,15 +321,16 @@ func (s *RediStore) save(session *sessions.Session) error {
 	if age == 0 {
 		age = s.DefaultMaxAge
 	}
-	cmd := s.Pool.Set( s.keyPrefix+session.ID, b, time.Duration(age)*time.Second)
+	ctx := context.Background()
+	cmd := s.Pool.Set( ctx,s.keyPrefix+session.ID, b, time.Duration(age)*time.Second)
 	return cmd.Err()
 }
 
 // load reads the session from redis.
 // returns true if there is a sessoin data in DB
 func (s *RediStore) load(session *sessions.Session) (bool, error) {
-
-	cmd := s.Pool.Get( s.keyPrefix+session.ID)
+	ctx := context.Background()
+	cmd := s.Pool.Get(ctx, s.keyPrefix+session.ID)
 	if cmd.Err() != nil {
 		return false, cmd.Err()
 	}
@@ -340,7 +343,8 @@ func (s *RediStore) load(session *sessions.Session) (bool, error) {
 // delete removes keys from redis if MaxAge<0
 func (s *RediStore) delete(session *sessions.Session) error {
 
-	cmd := s.Pool.Del(s.keyPrefix+session.ID)
+	ctx := context.Background()
+	cmd := s.Pool.Del(ctx,s.keyPrefix+session.ID)
 	if cmd.Err() != nil {
 		return cmd.Err()
 	}
