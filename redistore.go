@@ -140,7 +140,7 @@ func (s *RediStore) SetMaxAge(v int) {
 
 // NewRediStore returns a new RediStore.
 // size: maximum number of idle connections.
-func NewRediStore(size int, addr, passwd string,mode, mastername string, keyPairs ...[]byte) (*RediStore, error) {
+func NewRediStore(size int, addr, username,passwd string,mode, mastername string, keyPairs ...[]byte) (*RediStore, error) {
 	var client *redis.Client
 	address := strings.Split(addr,",")
 	switch mode {
@@ -148,6 +148,7 @@ func NewRediStore(size int, addr, passwd string,mode, mastername string, keyPair
 		client = redis.NewClient(&redis.Options{
 			Addr:     addr,
 			Password: passwd, // no password set
+			Username: username,
 			DB:       0,     // use default DB
 			PoolSize: size,
 		})
@@ -157,7 +158,7 @@ func NewRediStore(size int, addr, passwd string,mode, mastername string, keyPair
 			MasterName: mastername,
 			// A seed list of host:port addresses of sentinel nodes.
 			SentinelAddrs: address,
-
+			Username: username,
 			// Following options are copied from Options struct.
 			Password: passwd,
 			DB:       0,
@@ -170,7 +171,7 @@ func NewRediStore(size int, addr, passwd string,mode, mastername string, keyPair
 
 // NewRediStoreWithDB - like NewRedisStore but accepts `DB` parameter to select
 // redis DB instead of using the default one ("0")
-func NewRediStoreWithDB(size,db int, addr, passwd string,mode, mastername string, keyPairs ...[]byte) (*RediStore, error) {
+func NewRediStoreWithDB(size,db int, addr,username, passwd string,mode, mastername string, keyPairs ...[]byte) (*RediStore, error) {
 	var client *redis.Client
 	address := strings.Split(addr,",")
 	switch mode {
@@ -178,6 +179,7 @@ func NewRediStoreWithDB(size,db int, addr, passwd string,mode, mastername string
 		client = redis.NewClient(&redis.Options{
 			Addr:     addr,
 			Password: passwd, // no password set
+			Username: username,
 			DB:       db,     // use default DB
 			PoolSize: size,
 		})
@@ -187,7 +189,7 @@ func NewRediStoreWithDB(size,db int, addr, passwd string,mode, mastername string
 			MasterName: mastername,
 			// A seed list of host:port addresses of sentinel nodes.
 			SentinelAddrs: address,
-
+			Username: username,
 			// Following options are copied from Options struct.
 			Password: passwd,
 			DB:       db,
